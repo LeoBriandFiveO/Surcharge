@@ -1,4 +1,4 @@
--- Schéma Supabase de Suivi Muscu.
+-- Schéma Supabase de Surcharge.
 -- À coller dans Supabase > SQL Editor > New query, puis "Run".
 
 -- ---------------------------------------------------------------

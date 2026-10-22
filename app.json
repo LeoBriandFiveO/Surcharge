@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Suivi Muscu",
-    "slug": "suivi-muscu",
+    "name": "Surcharge",
+    "slug": "surcharge",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "suivimuscu",
+    "scheme": "surcharge",
     "userInterfaceStyle": "dark",
     "ios": {
       "icon": "./assets/expo.icon"

@@ -55,8 +55,8 @@ export default function Login() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Screen>
         <View style={{ marginTop: space.xl * 2, marginBottom: space.lg, gap: space.xs }}>
-          <Text style={{ color: colors.accent, fontSize: 40, fontWeight: '900' }}>Suivi Muscu</Text>
-          <Muted>Tes séances, tes charges, tes potes.</Muted>
+          <Text style={{ color: colors.accent, fontSize: 40, fontWeight: '900' }}>Surcharge</Text>
+          <Muted>Surcharge progressive, entre potes.</Muted>
         </View>
         <Card style={{ gap: space.md }}>
           {mode === 'signup' && (

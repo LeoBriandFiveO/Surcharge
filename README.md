@@ -1,4 +1,4 @@
-# Suivi Muscu 🏋️
+# Surcharge 🏋️
 
 Application mobile (Android et iPhone) pour suivre tes séances de musculation :
 
@@ -28,8 +28,8 @@ Stack : [Expo](https://expo.dev) (React Native, SDK 58, Expo Router) + [Supabase
 Il te faut [Node.js](https://nodejs.org) 20 ou plus.
 
 ```bash
-git clone https://github.com/LeoBriandFiveO/suivi-muscu.git
-cd suivi-muscu
+git clone https://github.com/LeoBriandFiveO/surcharge.git
+cd surcharge
 npm install
 cp .env.example .env    # puis remplis les deux valeurs Supabase dans .env
 ```
