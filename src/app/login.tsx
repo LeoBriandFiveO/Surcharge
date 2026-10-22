@@ -41,8 +41,12 @@ export default function Login() {
       });
       if (error) throw error;
       if (!data.session) {
-        Alert.alert('Vérifie tes e-mails', 'Clique sur le lien de confirmation puis connecte-toi.');
-        setMode('signin');
+        // Pas de session si la confirmation d'e-mail est active : on tente quand même la connexion.
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        if (signInError) {
+          Alert.alert('Vérifie tes e-mails', 'Clique sur le lien de confirmation puis connecte-toi.');
+          setMode('signin');
+        }
       }
     } catch (e) {
       Alert.alert('Oups', e instanceof Error ? e.message : String(e));

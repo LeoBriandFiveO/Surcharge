@@ -90,7 +90,10 @@ create index on public.workouts (user_id, finished_at desc);
 -- Création automatique du profil à l'inscription
 -- ---------------------------------------------------------------
 
-create function public.handle_new_user()
+create schema if not exists private;
+grant usage on schema private to authenticated;
+
+create function private.handle_new_user()
 returns trigger
 language plpgsql
 security definer set search_path = ''
@@ -108,14 +111,32 @@ $$;
 
 create trigger on_auth_user_created
   after insert on auth.users
-  for each row execute function public.handle_new_user();
+  for each row execute function private.handle_new_user();
+
+-- App entre amis : pas de validation d'e-mail, on peut se connecter tout de suite.
+create function private.auto_confirm_email()
+returns trigger
+language plpgsql
+security definer set search_path = ''
+as $$
+begin
+  if new.email_confirmed_at is null then
+    new.email_confirmed_at := now();
+  end if;
+  return new;
+end;
+$$;
+
+create trigger auto_confirm_email
+  before insert on auth.users
+  for each row execute function private.auto_confirm_email();
 
 -- ---------------------------------------------------------------
 -- Règles de visibilité : je vois mes données, et les séances
 -- publiques des personnes que je suis.
 -- ---------------------------------------------------------------
 
-create function public.is_following(target uuid)
+create function private.is_following(target uuid)
 returns boolean
 language sql stable security definer set search_path = ''
 as $$
@@ -125,16 +146,23 @@ as $$
   );
 $$;
 
-create function public.can_view_workout(wid uuid)
+create function private.can_view_workout(wid uuid)
 returns boolean
 language sql stable security definer set search_path = ''
 as $$
   select exists (
     select 1 from public.workouts w
     where w.id = wid
-      and (w.user_id = auth.uid() or (w.is_public and public.is_following(w.user_id)))
+      and (w.user_id = auth.uid() or (w.is_public and private.is_following(w.user_id)))
   );
 $$;
+
+revoke execute on function private.is_following(uuid) from public, anon;
+revoke execute on function private.can_view_workout(uuid) from public, anon;
+revoke execute on function private.handle_new_user() from public, anon, authenticated;
+revoke execute on function private.auto_confirm_email() from public, anon, authenticated;
+grant execute on function private.is_following(uuid) to authenticated;
+grant execute on function private.can_view_workout(uuid) to authenticated;
 
 alter table public.profiles enable row level security;
 alter table public.exercises enable row level security;
@@ -152,7 +180,7 @@ create policy "modifier mon profil" on public.profiles
   for update to authenticated using (id = auth.uid());
 
 create policy "voir exercices" on public.exercises
-  for select to authenticated using (user_id = auth.uid() or public.is_following(user_id));
+  for select to authenticated using (user_id = auth.uid() or private.is_following(user_id));
 create policy "gérer mes exercices" on public.exercises
   for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 
@@ -166,12 +194,12 @@ create policy "gérer exercices de mes programmes" on public.routine_exercises
 
 create policy "voir séances" on public.workouts
   for select to authenticated
-  using (user_id = auth.uid() or (is_public and public.is_following(user_id)));
+  using (user_id = auth.uid() or (is_public and private.is_following(user_id)));
 create policy "gérer mes séances" on public.workouts
   for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 create policy "voir séries" on public.workout_sets
-  for select to authenticated using (public.can_view_workout(workout_id));
+  for select to authenticated using (private.can_view_workout(workout_id));
 create policy "gérer mes séries" on public.workout_sets
   for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 
@@ -183,15 +211,15 @@ create policy "ne plus suivre" on public.follows
   for delete to authenticated using (follower_id = auth.uid());
 
 create policy "voir kudos" on public.kudos
-  for select to authenticated using (public.can_view_workout(workout_id));
+  for select to authenticated using (private.can_view_workout(workout_id));
 create policy "donner kudos" on public.kudos
-  for insert to authenticated with check (user_id = auth.uid() and public.can_view_workout(workout_id));
+  for insert to authenticated with check (user_id = auth.uid() and private.can_view_workout(workout_id));
 create policy "retirer kudos" on public.kudos
   for delete to authenticated using (user_id = auth.uid());
 
 create policy "voir commentaires" on public.comments
-  for select to authenticated using (public.can_view_workout(workout_id));
+  for select to authenticated using (private.can_view_workout(workout_id));
 create policy "commenter" on public.comments
-  for insert to authenticated with check (user_id = auth.uid() and public.can_view_workout(workout_id));
+  for insert to authenticated with check (user_id = auth.uid() and private.can_view_workout(workout_id));
 create policy "supprimer mon commentaire" on public.comments
   for delete to authenticated using (user_id = auth.uid());
