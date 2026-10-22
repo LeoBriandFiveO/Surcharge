@@ -2,7 +2,7 @@
 // (iPhone : Safari > Partager > Sur l'écran d'accueil) et compatible avec GitHub Pages.
 import { copyFileSync, readFileSync, writeFileSync } from 'node:fs';
 
-const base = '/surcharge';
+const base = '/Surcharge';
 const file = 'dist/index.html';
 let html = readFileSync(file, 'utf8');
 

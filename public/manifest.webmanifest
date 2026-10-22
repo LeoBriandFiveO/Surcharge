@@ -3,14 +3,14 @@
   "short_name": "Surcharge",
   "description": "Suivi musculation : charges suggérées, progression et potes.",
   "lang": "fr",
-  "start_url": "/surcharge/",
-  "scope": "/surcharge/",
+  "start_url": "/Surcharge/",
+  "scope": "/Surcharge/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0E0F12",
   "theme_color": "#0E0F12",
   "icons": [
-    { "src": "/surcharge/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/surcharge/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/Surcharge/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/Surcharge/icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
