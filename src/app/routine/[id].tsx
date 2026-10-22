@@ -1,6 +1,6 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { Body, Button, Card, Input, Loading, Muted, Row, Screen, Subtitle } from '@/components/ui';
 import { useUserId } from '@/lib/auth';
@@ -8,6 +8,7 @@ import { parseNumber } from '@/lib/format';
 import { supabase } from '@/lib/supabase';
 import { colors, radius, space } from '@/lib/theme';
 import type { Exercise, RoutineExercise } from '@/lib/types';
+import { Alert } from '@/lib/alert';
 
 type Item = {
   key: string;

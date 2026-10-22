@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, Linking, Text, View } from 'react-native';
+import { Linking, Text, View } from 'react-native';
 
 import { Avatar, Body, Button, Card, Input, Muted, Row, Screen, Stat, Subtitle, Title } from '@/components/ui';
 import { useAuth, useUserId } from '@/lib/auth';
@@ -8,6 +8,7 @@ import { PRIVACY_URL } from '@/lib/config';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/lib/theme';
 import type { Profile } from '@/lib/types';
+import { Alert } from '@/lib/alert';
 
 export default function ProfileScreen() {
   const userId = useUserId();

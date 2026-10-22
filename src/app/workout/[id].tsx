@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, Switch, Text, TextInput, Vibration, View } from 'react-native';
+import { Pressable, Switch, Text, TextInput, Vibration, View } from 'react-native';
 
 import { Body, Button, Card, Input, Loading, Muted, Row, Screen } from '@/components/ui';
 import { useUserId } from '@/lib/auth';
@@ -16,6 +16,7 @@ import {
 import { supabase } from '@/lib/supabase';
 import { colors, radius, space } from '@/lib/theme';
 import type { Exercise, RoutineExercise, Workout, WorkoutSet } from '@/lib/types';
+import { Alert } from '@/lib/alert';
 
 const REST_SECONDS = 90;
 

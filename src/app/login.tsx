@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 
 import { Button, Card, Input, Muted, Screen } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
 import { colors, space } from '@/lib/theme';
+import { Alert } from '@/lib/alert';
 
 export default function Login() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');

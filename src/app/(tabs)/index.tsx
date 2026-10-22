@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Body, Button, Card, Empty, Muted, Row, styles, Subtitle, Title } from '@/components/ui';
@@ -9,6 +9,7 @@ import { formatDate } from '@/lib/format';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/lib/theme';
 import type { Workout } from '@/lib/types';
+import { Alert } from '@/lib/alert';
 
 type RoutineRow = {
   id: string;
