@@ -1,18 +1,30 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
-import { Body, Button, Card, Input, Loading, Muted, Row, Screen, Subtitle } from '@/components/ui';
+import { MuscleMap } from '@/components/muscle-map';
+import { Appear, Body, Button, Card, Input, Loading, Muted, Row, Screen, Subtitle } from '@/components/ui';
+import { Alert } from '@/lib/alert';
 import { useUserId } from '@/lib/auth';
+import {
+  catalog,
+  findCatalog,
+  groups,
+  muscleNames,
+  sessionTypes,
+  suggestionsFor,
+  type CatalogExercise,
+  type Group,
+} from '@/lib/catalog';
 import { parseNumber } from '@/lib/format';
 import { supabase } from '@/lib/supabase';
 import { colors, radius, space } from '@/lib/theme';
 import type { Exercise, RoutineExercise } from '@/lib/types';
-import { Alert } from '@/lib/alert';
 
 type Item = {
   key: string;
   exerciseId: string | null;
+  catalogId: string | null;
   name: string;
   sets: string;
   repMin: string;
@@ -27,11 +39,28 @@ function fromExercise(e: Exercise, sets = 3): Item {
   return {
     key: newKey(),
     exerciseId: e.id,
+    catalogId: findCatalog(e.catalog_id, e.name)?.id ?? null,
     name: e.name,
     sets: String(sets),
     repMin: String(e.rep_min),
     repMax: String(e.rep_max),
     increment: String(e.increment).replace('.', ','),
+  };
+}
+
+function fromCatalog(c: CatalogExercise, library: Exercise[]): Item {
+  // Réutilise l'exercice si tu l'as déjà, pour garder ton historique.
+  const existing = library.find((e) => findCatalog(e.catalog_id, e.name)?.id === c.id);
+  if (existing) return fromExercise(existing);
+  return {
+    key: newKey(),
+    exerciseId: null,
+    catalogId: c.id,
+    name: c.name,
+    sets: '3',
+    repMin: String(c.repMin),
+    repMax: String(c.repMax),
+    increment: String(c.increment).replace('.', ','),
   };
 }
 
@@ -46,6 +75,8 @@ export default function RoutineEditor() {
   const [library, setLibrary] = useState<Exercise[]>([]);
   const [picking, setPicking] = useState(false);
   const [newName, setNewName] = useState('');
+  const [sessionType, setSessionType] = useState<string | null>(null);
+  const [group, setGroup] = useState<Group>('Pecs');
 
   useEffect(() => {
     (async () => {
@@ -88,7 +119,7 @@ export default function RoutineEditor() {
     if (!n) return;
     setItems((list) => [
       ...list,
-      { key: newKey(), exerciseId: null, name: n, sets: '3', repMin: '8', repMax: '12', increment: '2,5' },
+      { key: newKey(), exerciseId: null, catalogId: null, name: n, sets: '3', repMin: '8', repMax: '12', increment: '2,5' },
     ]);
     setNewName('');
     setPicking(false);
@@ -122,6 +153,7 @@ export default function RoutineEditor() {
       for (const p of parsed) {
         const fields = {
           name: p.name.trim(),
+          catalog_id: p.catalogId,
           rep_min: p.repMinN,
           rep_max: p.repMaxN,
           increment: p.incrementN,
@@ -189,21 +221,55 @@ export default function RoutineEditor() {
   if (loading) return <Loading />;
 
   const available = library.filter((e) => !items.some((it) => it.exerciseId === e.id));
+  const hasCatalog = (c: CatalogExercise) => items.some((it) => it.catalogId === c.id);
+  function toggleCatalog(c: CatalogExercise) {
+    if (hasCatalog(c)) setItems((l) => l.filter((it) => it.catalogId !== c.id));
+    else setItems((l) => [...l, fromCatalog(c, library)]);
+  }
+  const type = sessionTypes.find((t) => t.label === sessionType);
 
   return (
     <Screen edges={['bottom']}>
       <Stack.Screen options={{ title: isNew ? 'Nouveau programme' : 'Modifier le programme' }} />
       <Input label="Nom du programme" value={name} onChangeText={setName} placeholder="Ex. Push, Haut du corps…" />
 
-      <Subtitle>Exercices</Subtitle>
+      <Subtitle>Quel type de séance ?</Subtitle>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+        {sessionTypes.map((t) => (
+          <Chip
+            key={t.label}
+            label={t.label}
+            active={sessionType === t.label}
+            onPress={() => {
+              setSessionType(sessionType === t.label ? null : t.label);
+              if (!name.trim()) setName(t.label);
+            }}
+          />
+        ))}
+      </ScrollView>
+      {type && (
+        <View style={{ gap: space.sm }}>
+          <Muted>Exercices adaptés à une séance {type.label.toLowerCase()} : touche pour ajouter ou retirer.</Muted>
+          {suggestionsFor(type.muscles).map((c, i) => (
+            <Appear key={c.id} index={i}>
+              <CatalogRow exercise={c} added={hasCatalog(c)} onPress={() => toggleCatalog(c)} />
+            </Appear>
+          ))}
+        </View>
+      )}
+
+      <Subtitle>Exercices du programme ({items.length})</Subtitle>
       <Muted>
         L’app te fera progresser dans la fourchette de reps, puis ajoutera l’incrément de charge
         quand toutes tes séries atteignent le max. Mets un incrément de 0 pour le poids du corps.
       </Muted>
 
-      {items.map((it, index) => (
+      {items.map((it, index) => {
+        const c = findCatalog(it.catalogId, it.name);
+        return (
         <Card key={it.key}>
           <Row>
+            {c && <MuscleMap primary={c.primary} secondary={c.secondary} width={56} />}
             <TextInput
               value={it.name}
               onChangeText={(t) => update(it.key, { name: t })}
@@ -224,11 +290,23 @@ export default function RoutineEditor() {
             <Field label="+ kg" value={it.increment} onChange={(t) => update(it.key, { increment: t })} decimal />
           </Row>
         </Card>
-      ))}
+        );
+      })}
 
       {picking ? (
         <Card>
           <Body style={{ fontWeight: '700' }}>Ajouter un exercice</Body>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+            {groups.map((g) => (
+              <Chip key={g} label={g} active={group === g} onPress={() => setGroup(g)} />
+            ))}
+          </ScrollView>
+          {catalog
+            .filter((c) => c.group === group)
+            .map((c) => (
+              <CatalogRow key={c.id} exercise={c} added={hasCatalog(c)} onPress={() => toggleCatalog(c)} />
+            ))}
+          <Muted>Ou crée ton propre exercice :</Muted>
           <Row>
             <TextInput
               value={newName}
@@ -236,7 +314,6 @@ export default function RoutineEditor() {
               placeholder="Nouvel exercice (ex. Développé couché)"
               placeholderTextColor={colors.muted}
               onSubmitEditing={addNew}
-              autoFocus
               style={{
                 flex: 1,
                 color: colors.text,
@@ -272,6 +349,62 @@ export default function RoutineEditor() {
       <Button title="Enregistrer" onPress={save} loading={saving} style={{ marginTop: space.md }} />
       {!isNew && <Button variant="danger" title="Supprimer le programme" onPress={remove} />}
     </Screen>
+  );
+}
+
+function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        paddingHorizontal: space.md,
+        paddingVertical: space.sm,
+        borderRadius: 999,
+        backgroundColor: active ? colors.accent : colors.cardAlt,
+        borderWidth: 1,
+        borderColor: active ? colors.accent : colors.border,
+      }}>
+      <Text style={{ color: active ? '#fff' : colors.text, fontWeight: '700' }}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function CatalogRow({
+  exercise,
+  added,
+  onPress,
+}: {
+  exercise: CatalogExercise;
+  added: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: space.md,
+        padding: space.sm,
+        borderRadius: radius.md,
+        backgroundColor: added ? colors.accentSoft : colors.cardAlt,
+        borderWidth: 1,
+        borderColor: added ? colors.accent : 'transparent',
+        opacity: pressed ? 0.8 : 1,
+      })}>
+      <MuscleMap primary={exercise.primary} secondary={exercise.secondary} width={84} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <Body style={{ fontWeight: '700' }}>{exercise.name}</Body>
+        <Muted style={{ fontSize: 12 }}>{exercise.primary.map((m) => muscleNames[m]).join(', ')}</Muted>
+        <Muted style={{ fontSize: 12 }}>
+          {exercise.repMin}–{exercise.repMax} reps
+          {exercise.increment > 0 ? ` · +${String(exercise.increment).replace('.', ',')} kg` : ' · poids du corps'}
+        </Muted>
+      </View>
+      <Text style={{ color: added ? colors.accent : colors.muted, fontSize: 22, fontWeight: '800' }}>
+        {added ? '✓' : '+'}
+      </Text>
+    </Pressable>
   );
 }
 

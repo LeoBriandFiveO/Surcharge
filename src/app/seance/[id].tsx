@@ -4,6 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { WorkoutCard, groupByExercise } from '@/components/workout-card';
 import { Avatar, Body, Button, Card, Input, Loading, Muted, Row, Screen, Subtitle } from '@/components/ui';
+import { Alert } from '@/lib/alert';
 import { useUserId } from '@/lib/auth';
 import { formatDate } from '@/lib/format';
 import { estimatedOneRepMax, formatKg } from '@/lib/progression';
@@ -11,7 +12,6 @@ import { toggleKudo } from '@/lib/social';
 import { supabase } from '@/lib/supabase';
 import { colors, space } from '@/lib/theme';
 import { FEED_SELECT, type Comment, type FeedWorkout } from '@/lib/types';
-import { Alert } from '@/lib/alert';
 
 export default function WorkoutDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();

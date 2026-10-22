@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { isConfigured } from '@/lib/supabase';
 import { colors } from '@/lib/theme';
+import { WebSafeArea } from '@/lib/web-safe-area';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -62,10 +63,12 @@ function RootStack() {
 export default function RootLayout() {
   return (
     <ThemeProvider value={theme}>
-      <AuthProvider>
-        <StatusBar style="light" />
-        <RootStack />
-      </AuthProvider>
+      <WebSafeArea>
+        <AuthProvider>
+          <StatusBar style="light" />
+          <RootStack />
+        </AuthProvider>
+      </WebSafeArea>
     </ThemeProvider>
   );
 }

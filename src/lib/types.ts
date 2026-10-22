@@ -8,6 +8,7 @@ export type Exercise = {
   id: string;
   user_id: string;
   name: string;
+  catalog_id: string | null;
   rep_min: number;
   rep_max: number;
   increment: number;

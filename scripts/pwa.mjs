@@ -20,7 +20,8 @@ html = html.replace(
     '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">',
     '<meta name="apple-mobile-web-app-title" content="Surcharge">',
     '<meta name="theme-color" content="#0E0F12">',
-    '<style>html,body{background:#0E0F12}</style>',
+    // L'app occupe tout l'écran, y compris sous l'heure et la barre d'accueil (les marges sont gérées par l'app).
+    '<style>html,body{background:#0E0F12;overscroll-behavior:none}body{position:fixed;inset:0;overflow:hidden}#root{position:absolute;inset:0;height:auto!important}</style>',
     '</head>',
   ].join('\n'),
 );

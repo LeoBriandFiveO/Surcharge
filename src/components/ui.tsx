@@ -13,6 +13,7 @@ import {
   type TextStyle,
   type ViewStyle,
 } from 'react-native';
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { initials } from '@/lib/format';
@@ -41,7 +42,11 @@ export function Screen({
 }
 
 export function Title({ children, style }: { children: ReactNode; style?: StyleProp<TextStyle> }) {
-  return <Text style={[styles.title, style]}>{children}</Text>;
+  return (
+    <Animated.Text entering={FadeInDown.duration(350)} style={[styles.title, style]}>
+      {children}
+    </Animated.Text>
+  );
 }
 
 export function Subtitle({ children }: { children: ReactNode }) {
@@ -60,21 +65,66 @@ export function Card({
   children,
   style,
   onPress,
+  index,
 }: {
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
+  // Position dans une liste : la carte apparaît en cascade.
+  index?: number;
 }) {
-  if (onPress) {
-    return (
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => [styles.card, pressed && { opacity: 0.8 }, style]}>
-        {children}
-      </Pressable>
-    );
-  }
-  return <View style={[styles.card, style]}>{children}</View>;
+  const content = onPress ? (
+    <Pressable_ onPress={onPress} style={[styles.card, style]}>
+      {children}
+    </Pressable_>
+  ) : (
+    <View style={[styles.card, style]}>{children}</View>
+  );
+  if (index === undefined) return content;
+  return <Appear index={index}>{content}</Appear>;
+}
+
+// Apparition douce en glissant vers le haut, décalée selon la position dans la liste.
+export function Appear({ children, index = 0 }: { children: ReactNode; index?: number }) {
+  return (
+    <Animated.View entering={FadeInDown.duration(380).delay(Math.min(index, 8) * 60).springify().damping(18)}>
+      {children}
+    </Animated.View>
+  );
+}
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+// Pressable qui s'enfonce légèrement sous le doigt.
+export function Pressable_({
+  children,
+  onPress,
+  disabled,
+  style,
+  pressedScale = 0.97,
+}: {
+  children: ReactNode;
+  onPress?: () => void;
+  disabled?: boolean;
+  style?: StyleProp<ViewStyle>;
+  pressedScale?: number;
+}) {
+  const scale = useSharedValue(1);
+  const animated = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      disabled={disabled}
+      onPressIn={() => {
+        scale.value = withSpring(pressedScale, { damping: 20, stiffness: 400 });
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1, { damping: 12, stiffness: 300 });
+      }}
+      style={[style, animated]}>
+      {children}
+    </AnimatedPressable>
+  );
 }
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -104,20 +154,17 @@ export function Button({
     variant
   ];
   return (
-    <Pressable
+    <Pressable_
       onPress={onPress}
       disabled={disabled || loading}
-      style={({ pressed }) => [
-        styles.button,
-        { backgroundColor: bg, opacity: disabled ? 0.4 : pressed ? 0.75 : 1 },
-        style,
-      ]}>
+      pressedScale={0.95}
+      style={[styles.button, { backgroundColor: bg, opacity: disabled ? 0.4 : 1 }, style]}>
       {loading ? (
         <ActivityIndicator color={fg} />
       ) : (
         <Text style={[styles.buttonText, { color: fg }]}>{title}</Text>
       )}
-    </Pressable>
+    </Pressable_>
   );
 }
 

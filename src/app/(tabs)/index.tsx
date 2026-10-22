@@ -4,12 +4,12 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Body, Button, Card, Empty, Muted, Row, styles, Subtitle, Title } from '@/components/ui';
+import { Alert } from '@/lib/alert';
 import { useAuth, useUserId } from '@/lib/auth';
 import { formatDate } from '@/lib/format';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/lib/theme';
 import type { Workout } from '@/lib/types';
-import { Alert } from '@/lib/alert';
 
 type RoutineRow = {
   id: string;
@@ -109,7 +109,7 @@ export default function Today() {
         <Title>On s’entraîne ?</Title>
 
         {ongoing && (
-          <Card style={{ borderColor: colors.accent, backgroundColor: colors.accentSoft }}>
+          <Card index={0} style={{ borderColor: colors.accent, backgroundColor: colors.accentSoft }}>
             <Body style={{ fontWeight: '700' }}>Séance en cours : {ongoing.title}</Body>
             <Muted>Commencée {formatDate(ongoing.started_at).toLowerCase()}</Muted>
             <Button title="Reprendre" onPress={() => router.push(`/workout/${ongoing.id}`)} />
@@ -130,14 +130,14 @@ export default function Today() {
             <Button title="Créer un programme" onPress={() => router.push('/routine/new')} />
           </Empty>
         ) : (
-          routines.map((routine) => {
+          routines.map((routine, i) => {
             const names = [...routine.routine_exercises]
               .sort((a, b) => a.position - b.position)
               .map((re) => re.exercises?.name)
               .filter(Boolean);
             const isNext = !ongoing && routine.id === next?.id && routines.length > 1;
             return (
-              <Card key={routine.id} style={isNext ? { borderColor: colors.accent } : undefined}>
+              <Card key={routine.id} index={i + 1} style={isNext ? { borderColor: colors.accent } : undefined}>
                 <Row style={{ justifyContent: 'space-between' }}>
                   <Body style={{ fontWeight: '700', fontSize: 18, flex: 1 }}>{routine.name}</Body>
                   {isNext && <Muted style={{ color: colors.accent }}>À faire</Muted>}

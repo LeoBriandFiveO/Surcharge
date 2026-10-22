@@ -2,7 +2,9 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 
+import { MuscleMap } from '@/components/muscle-map';
 import { Body, Card, Loading, Muted, Row, Screen, Stat, Subtitle } from '@/components/ui';
+import { findCatalog, muscleNames } from '@/lib/catalog';
 import { formatDate, formatShortDate } from '@/lib/format';
 import { bestSet, estimatedOneRepMax, formatKg, summarize, type SetLog } from '@/lib/progression';
 import { supabase } from '@/lib/supabase';
@@ -52,6 +54,7 @@ export default function ExerciseProgress() {
   }, [id]);
 
   if (!exercise) return <Loading />;
+  const catalogEntry = findCatalog(exercise.catalog_id, exercise.name);
 
   const points = sessions.map((s) => ({ ...s, e1rm: estimatedOneRepMax(bestSet(s.sets)!) }));
   const recent = points.slice(-12);
@@ -65,6 +68,15 @@ export default function ExerciseProgress() {
   return (
     <Screen edges={['bottom']}>
       <Stack.Screen options={{ title: exercise.name }} />
+      {catalogEntry && (
+        <Card index={0} style={{ alignItems: 'center' }}>
+          <MuscleMap primary={catalogEntry.primary} secondary={catalogEntry.secondary} width={240} labels />
+          <Muted style={{ textAlign: 'center' }}>
+            {catalogEntry.primary.map((m) => muscleNames[m]).join(', ')}
+            {catalogEntry.secondary.length > 0 && ` · aussi : ${catalogEntry.secondary.map((m) => muscleNames[m]).join(', ')}`}
+          </Muted>
+        </Card>
+      )}
       <Muted>
         Fourchette {exercise.rep_min}–{exercise.rep_max} reps · +{formatKg(Number(exercise.increment))} quand c’est validé
       </Muted>
@@ -112,8 +124,8 @@ export default function ExerciseProgress() {
 
       <Subtitle>Séances</Subtitle>
       {points.length === 0 && <Muted>Pas encore d’historique pour cet exercice.</Muted>}
-      {[...points].reverse().map((p) => (
-        <Card key={p.workoutId} onPress={() => router.push(`/seance/${p.workoutId}`)}>
+      {[...points].reverse().map((p, i) => (
+        <Card key={p.workoutId} index={i} onPress={() => router.push(`/seance/${p.workoutId}`)}>
           <Row style={{ justifyContent: 'space-between' }}>
             <Body style={{ fontWeight: '600' }}>{summarize(p.sets)}</Body>
             <Muted>1RM ≈ {formatKg(p.e1rm)}</Muted>

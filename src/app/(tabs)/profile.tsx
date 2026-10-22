@@ -3,12 +3,12 @@ import { useCallback, useState } from 'react';
 import { Linking, Text, View } from 'react-native';
 
 import { Avatar, Body, Button, Card, Input, Muted, Row, Screen, Stat, Subtitle, Title } from '@/components/ui';
+import { Alert } from '@/lib/alert';
 import { useAuth, useUserId } from '@/lib/auth';
 import { PRIVACY_URL } from '@/lib/config';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/lib/theme';
 import type { Profile } from '@/lib/types';
-import { Alert } from '@/lib/alert';
 
 export default function ProfileScreen() {
   const userId = useUserId();
@@ -112,7 +112,7 @@ export default function ProfileScreen() {
   return (
     <Screen>
       <Title>Profil</Title>
-      <Card>
+      <Card index={0}>
         <Row>
           <Avatar name={name || '?'} size={56} />
           <View style={{ flex: 1 }}>

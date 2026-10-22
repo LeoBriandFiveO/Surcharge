@@ -72,7 +72,7 @@ export default function History() {
           />
         }>
         <Title>Mes progrès</Title>
-        <Card>
+        <Card index={0}>
           <Muted>Ce mois-ci</Muted>
           <Row>
             <Stat label="Séances" value={String(thisMonth.length)} />
@@ -85,8 +85,8 @@ export default function History() {
         {exercises.length === 0 ? (
           <Muted>Tes exercices apparaîtront ici après avoir créé un programme.</Muted>
         ) : (
-          exercises.map((e) => (
-            <Card key={e.id} onPress={() => router.push(`/exercise/${e.id}`)}>
+          exercises.map((e, i) => (
+            <Card key={e.id} index={i + 1} onPress={() => router.push(`/exercise/${e.id}`)}>
               <Row style={{ justifyContent: 'space-between' }}>
                 <Body style={{ fontWeight: '600', flex: 1 }}>{e.name}</Body>
                 <Muted>{best.has(e.id) ? `1RM ≈ ${formatKg(best.get(e.id)!)}` : 'Pas encore fait'} ›</Muted>
@@ -101,7 +101,7 @@ export default function History() {
             <Muted>Lance ta première séance depuis l’onglet Séance.</Muted>
           </Empty>
         ) : (
-          workouts.map((w) => <WorkoutCard key={w.id} workout={w} userId={userId} />)
+          workouts.map((w, i) => <WorkoutCard key={w.id} workout={w} userId={userId} index={i} />)
         )}
       </ScrollView>
     </SafeAreaView>

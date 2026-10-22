@@ -19,6 +19,8 @@ create table public.exercises (
   rep_min int not null default 8 check (rep_min > 0),
   rep_max int not null default 12 check (rep_max >= rep_min),
   increment numeric not null default 2.5 check (increment >= 0),
+  -- Identifiant dans le catalogue de l'app (src/lib/catalog.ts), pour l'illustration des muscles.
+  catalog_id text,
   created_at timestamptz not null default now()
 );
 

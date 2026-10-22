@@ -22,10 +22,12 @@ export function WorkoutCard({
   workout,
   userId,
   onKudo,
+  index,
 }: {
   workout: FeedWorkout;
   userId: string;
   onKudo?: (workout: FeedWorkout) => void;
+  index?: number;
 }) {
   const author = workout.profiles?.display_name ?? workout.profiles?.username ?? '?';
   const sets = workout.workout_sets.map((s) => ({ weight: Number(s.weight), reps: s.reps }));
@@ -34,7 +36,7 @@ export function WorkoutCard({
   const commentCount = workout.comments[0]?.count ?? 0;
 
   return (
-    <Card onPress={() => router.push(`/seance/${workout.id}`)}>
+    <Card index={index} onPress={() => router.push(`/seance/${workout.id}`)}>
       <Row>
         <Avatar name={author} />
         <View style={{ flex: 1 }}>

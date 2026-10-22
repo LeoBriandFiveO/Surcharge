@@ -1,9 +1,20 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, Switch, Text, TextInput, Vibration, View } from 'react-native';
+import Animated, {
+  SlideInDown,
+  SlideOutDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+} from 'react-native-reanimated';
 
+import { MuscleMap } from '@/components/muscle-map';
 import { Body, Button, Card, Input, Loading, Muted, Row, Screen } from '@/components/ui';
+import { Alert } from '@/lib/alert';
 import { useUserId } from '@/lib/auth';
+import { findCatalog, muscleNames } from '@/lib/catalog';
 import { formatDuration, parseNumber } from '@/lib/format';
 import {
   formatKg,
@@ -16,7 +27,6 @@ import {
 import { supabase } from '@/lib/supabase';
 import { colors, radius, space } from '@/lib/theme';
 import type { Exercise, RoutineExercise, Workout, WorkoutSet } from '@/lib/types';
-import { Alert } from '@/lib/alert';
 
 const REST_SECONDS = 90;
 
@@ -239,8 +249,8 @@ export default function ActiveWorkout() {
         <ElapsedTime since={workout.started_at} />
 
         {blocks.map((block, bi) => (
-          <Card key={block.exercise.id}>
-            <Body style={{ fontSize: 18, fontWeight: '700' }}>{block.exercise.name}</Body>
+          <Card key={block.exercise.id} index={bi}>
+            <BlockHeader exercise={block.exercise} />
             <View
               style={{
                 backgroundColor: colors.cardAlt,
@@ -285,18 +295,7 @@ export default function ActiveWorkout() {
                   placeholder="reps"
                   onChange={(t) => editSet(bi, si, { reps: t })}
                 />
-                <Pressable
-                  onPress={() => toggleSet(bi, si)}
-                  style={{
-                    width: 48,
-                    height: 44,
-                    borderRadius: radius.md,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: set.done ? colors.success : colors.cardAlt,
-                  }}>
-                  <Text style={{ color: set.done ? '#fff' : colors.muted, fontSize: 20, fontWeight: '800' }}>✓</Text>
-                </Pressable>
+                <CheckButton done={set.done} onPress={() => toggleSet(bi, si)} />
               </Row>
             ))}
             <Button variant="ghost" title="+ Série" onPress={() => addSet(bi)} />
@@ -319,6 +318,51 @@ export default function ActiveWorkout() {
       </Screen>
       {restEnd && <RestTimer end={restEnd} onChange={setRestEnd} />}
     </View>
+  );
+}
+
+function BlockHeader({ exercise }: { exercise: Exercise }) {
+  const c = findCatalog(exercise.catalog_id, exercise.name);
+  return (
+    <Row style={{ justifyContent: 'space-between' }}>
+      <View style={{ flex: 1, gap: 2 }}>
+        <Body style={{ fontSize: 18, fontWeight: '700' }}>{exercise.name}</Body>
+        {c && <Muted style={{ fontSize: 12 }}>{c.primary.map((m) => muscleNames[m]).join(', ')}</Muted>}
+      </View>
+      {c && <MuscleMap primary={c.primary} secondary={c.secondary} width={72} />}
+    </Row>
+  );
+}
+
+// Bouton de validation : rebondit quand la série est validée.
+function CheckButton({ done, onPress }: { done: boolean; onPress: () => void }) {
+  const scale = useSharedValue(1);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    if (done) scale.value = withSequence(withSpring(1.25, { damping: 6, stiffness: 400 }), withSpring(1, { damping: 10 }));
+  }, [done, scale]);
+  const animated = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  return (
+    <Pressable onPress={onPress}>
+      <Animated.View
+        style={[
+          {
+            width: 48,
+            height: 44,
+            borderRadius: radius.md,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: done ? colors.success : colors.cardAlt,
+          },
+          animated,
+        ]}>
+        <Text style={{ color: done ? '#fff' : colors.muted, fontSize: 20, fontWeight: '800' }}>✓</Text>
+      </Animated.View>
+    </Pressable>
   );
 }
 
@@ -393,7 +437,9 @@ function RestTimer({ end, onChange }: { end: number; onChange: (end: number | nu
   const mm = Math.floor(remaining / 60);
   const ss = String(remaining % 60).padStart(2, '0');
   return (
-    <View
+    <Animated.View
+      entering={SlideInDown.springify().damping(16)}
+      exiting={SlideOutDown.duration(200)}
       style={{
         position: 'absolute',
         left: space.lg,
@@ -413,6 +459,6 @@ function RestTimer({ end, onChange }: { end: number; onChange: (end: number | nu
       </Text>
       {remaining > 0 && <Button variant="secondary" title="+30 s" onPress={() => onChange(end + 30000)} />}
       <Button variant="ghost" title={remaining === 0 ? 'OK' : 'Passer'} onPress={() => onChange(null)} />
-    </View>
+    </Animated.View>
   );
 }

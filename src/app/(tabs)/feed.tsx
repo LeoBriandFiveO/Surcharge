@@ -47,7 +47,7 @@ export default function Feed() {
         keyExtractor={(w) => w.id}
         contentContainerStyle={styles.content}
         ListHeaderComponent={<Title>Fil d’actu</Title>}
-        renderItem={({ item }) => <WorkoutCard workout={item} userId={userId} onKudo={kudo} />}
+        renderItem={({ item, index }) => <WorkoutCard workout={item} userId={userId} onKudo={kudo} index={index} />}
         ListEmptyComponent={
           loaded ? (
             <Empty title="Rien à voir pour l’instant">
