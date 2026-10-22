@@ -2,18 +2,21 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
-import { MuscleMap } from '@/components/muscle-map';
+import { ExerciseFigure } from '@/components/exercise-figure';
+import { ExerciseSheet } from '@/components/exercise-sheet';
 import { Appear, Body, Button, Card, Input, Loading, Muted, Row, Screen, Subtitle } from '@/components/ui';
 import { Alert } from '@/lib/alert';
 import { useUserId } from '@/lib/auth';
 import {
   catalog,
+  equipments,
   findCatalog,
   groups,
   muscleNames,
   sessionTypes,
   suggestionsFor,
   type CatalogExercise,
+  type Equipment,
   type Group,
 } from '@/lib/catalog';
 import { parseNumber } from '@/lib/format';
@@ -77,6 +80,8 @@ export default function RoutineEditor() {
   const [newName, setNewName] = useState('');
   const [sessionType, setSessionType] = useState<string | null>(null);
   const [group, setGroup] = useState<Group>('Pecs');
+  const [equipment, setEquipment] = useState<Equipment | null>(null);
+  const [info, setInfo] = useState<CatalogExercise | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -252,7 +257,7 @@ export default function RoutineEditor() {
           <Muted>Exercices adaptés à une séance {type.label.toLowerCase()} : touche pour ajouter ou retirer.</Muted>
           {suggestionsFor(type.muscles).map((c, i) => (
             <Appear key={c.id} index={i}>
-              <CatalogRow exercise={c} added={hasCatalog(c)} onPress={() => toggleCatalog(c)} />
+              <CatalogRow exercise={c} added={hasCatalog(c)} onPress={() => toggleCatalog(c)} onInfo={() => setInfo(c)} />
             </Appear>
           ))}
         </View>
@@ -269,7 +274,11 @@ export default function RoutineEditor() {
         return (
         <Card key={it.key}>
           <Row>
-            {c && <MuscleMap primary={c.primary} secondary={c.secondary} width={56} />}
+            {c && (
+              <Pressable onPress={() => setInfo(c)} style={{ backgroundColor: colors.bg, borderRadius: radius.md }}>
+                <ExerciseFigure motion={c.motion} primary={c.primary} secondary={c.secondary} equipment={c.equipment} size={52} />
+              </Pressable>
+            )}
             <TextInput
               value={it.name}
               onChangeText={(t) => update(it.key, { name: t })}
@@ -301,10 +310,16 @@ export default function RoutineEditor() {
               <Chip key={g} label={g} active={group === g} onPress={() => setGroup(g)} />
             ))}
           </ScrollView>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+            <Chip label="Tout" active={equipment === null} small onPress={() => setEquipment(null)} />
+            {equipments.map((e) => (
+              <Chip key={e} label={e} active={equipment === e} small onPress={() => setEquipment(e)} />
+            ))}
+          </ScrollView>
           {catalog
-            .filter((c) => c.group === group)
+            .filter((c) => c.group === group && (equipment === null || c.equipment === equipment))
             .map((c) => (
-              <CatalogRow key={c.id} exercise={c} added={hasCatalog(c)} onPress={() => toggleCatalog(c)} />
+              <CatalogRow key={c.id} exercise={c} added={hasCatalog(c)} onPress={() => toggleCatalog(c)} onInfo={() => setInfo(c)} />
             ))}
           <Muted>Ou crée ton propre exercice :</Muted>
           <Row>
@@ -348,23 +363,34 @@ export default function RoutineEditor() {
 
       <Button title="Enregistrer" onPress={save} loading={saving} style={{ marginTop: space.md }} />
       {!isNew && <Button variant="danger" title="Supprimer le programme" onPress={remove} />}
+      <ExerciseSheet exercise={info} onClose={() => setInfo(null)} />
     </Screen>
   );
 }
 
-function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+function Chip({
+  label,
+  active,
+  onPress,
+  small,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  small?: boolean;
+}) {
   return (
     <Pressable
       onPress={onPress}
       style={{
-        paddingHorizontal: space.md,
-        paddingVertical: space.sm,
+        paddingHorizontal: small ? space.sm + 2 : space.md,
+        paddingVertical: small ? 5 : space.sm,
         borderRadius: 999,
         backgroundColor: active ? colors.accent : colors.cardAlt,
         borderWidth: 1,
         borderColor: active ? colors.accent : colors.border,
       }}>
-      <Text style={{ color: active ? '#fff' : colors.text, fontWeight: '700' }}>{label}</Text>
+      <Text style={{ color: active ? '#fff' : colors.text, fontWeight: '700', fontSize: small ? 13 : 15 }}>{label}</Text>
     </Pressable>
   );
 }
@@ -373,10 +399,12 @@ function CatalogRow({
   exercise,
   added,
   onPress,
+  onInfo,
 }: {
   exercise: CatalogExercise;
   added: boolean;
   onPress: () => void;
+  onInfo: () => void;
 }) {
   return (
     <Pressable
@@ -392,10 +420,20 @@ function CatalogRow({
         borderColor: added ? colors.accent : 'transparent',
         opacity: pressed ? 0.8 : 1,
       })}>
-      <MuscleMap primary={exercise.primary} secondary={exercise.secondary} width={84} />
+      <Pressable onPress={onInfo} hitSlop={4} style={{ backgroundColor: colors.bg, borderRadius: radius.md }}>
+        <ExerciseFigure
+          motion={exercise.motion}
+          primary={exercise.primary}
+          secondary={exercise.secondary}
+          equipment={exercise.equipment}
+          size={76}
+        />
+      </Pressable>
       <View style={{ flex: 1, gap: 2 }}>
         <Body style={{ fontWeight: '700' }}>{exercise.name}</Body>
-        <Muted style={{ fontSize: 12 }}>{exercise.primary.map((m) => muscleNames[m]).join(', ')}</Muted>
+        <Muted style={{ fontSize: 12 }}>
+          {exercise.primary.map((m) => muscleNames[m]).join(', ')} · {exercise.equipment}
+        </Muted>
         <Muted style={{ fontSize: 12 }}>
           {exercise.repMin}–{exercise.repMax} reps
           {exercise.increment > 0 ? ` · +${String(exercise.increment).replace('.', ',')} kg` : ' · poids du corps'}

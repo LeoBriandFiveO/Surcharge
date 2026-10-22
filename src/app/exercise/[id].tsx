@@ -2,6 +2,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 
+import { ExerciseFigure } from '@/components/exercise-figure';
 import { MuscleMap } from '@/components/muscle-map';
 import { Body, Card, Loading, Muted, Row, Screen, Stat, Subtitle } from '@/components/ui';
 import { findCatalog, muscleNames } from '@/lib/catalog';
@@ -70,7 +71,17 @@ export default function ExerciseProgress() {
       <Stack.Screen options={{ title: exercise.name }} />
       {catalogEntry && (
         <Card index={0} style={{ alignItems: 'center' }}>
-          <MuscleMap primary={catalogEntry.primary} secondary={catalogEntry.secondary} width={240} labels />
+          <Row style={{ gap: 16 }}>
+            <ExerciseFigure
+              motion={catalogEntry.motion}
+              primary={catalogEntry.primary}
+              secondary={catalogEntry.secondary}
+              equipment={catalogEntry.equipment}
+              size={150}
+              animated
+            />
+            <MuscleMap primary={catalogEntry.primary} secondary={catalogEntry.secondary} width={120} labels />
+          </Row>
           <Muted style={{ textAlign: 'center' }}>
             {catalogEntry.primary.map((m) => muscleNames[m]).join(', ')}
             {catalogEntry.secondary.length > 0 && ` · aussi : ${catalogEntry.secondary.map((m) => muscleNames[m]).join(', ')}`}

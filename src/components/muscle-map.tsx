@@ -4,13 +4,13 @@ import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
 import type { Muscle } from '@/lib/catalog';
 import { colors } from '@/lib/theme';
 
-const BASE = '#2A2E36';
-const IDLE = '#3B404A';
-const PRIMARY = '#FF3B3B';
-const SECONDARY = '#93303A';
+export const BASE = '#2A2E36';
+export const IDLE = '#3B404A';
+export const PRIMARY = '#FF3B3B';
+export const SECONDARY = '#93303A';
 
 // Formes d'une moitié du corps (côté gauche de l'image, x < 50) ; l'autre moitié est un miroir.
-const front: [Muscle, string][] = [
+export const frontShapes: [Muscle, string][] = [
   ['traps', 'M45 29 L37 33 L45 33 Z'],
   ['shoulders', 'M36 32 Q26 31 24 42 Q25 47 29 48 L35 40 Z'],
   ['chest', 'M49 34 L37 34 Q33 40 34 50 Q41 55 49 52 Z'],
@@ -21,7 +21,7 @@ const front: [Muscle, string][] = [
   ['calves', 'M35 143 Q33 157 37 172 L43 172 Q46 157 44 143 Z'],
 ];
 
-const back: [Muscle, string][] = [
+export const backShapes: [Muscle, string][] = [
   ['traps', 'M50 24 L44 28 L35 33 L43 40 L50 46 Z'],
   ['shoulders', 'M36 32 Q26 31 24 42 Q25 47 29 48 L35 40 Z'],
   ['lats', 'M49 47 L42 41 L35 38 Q33 52 38 66 L49 72 Z'],
@@ -88,9 +88,9 @@ export function MuscleMap({
   return (
     <View style={{ alignItems: 'center' }}>
       <Svg width={width} height={height} viewBox="0 0 210 185">
-        <Figure shapes={front} fill={fill} view="front" />
+        <Figure shapes={frontShapes} fill={fill} view="front" />
         <G transform="translate(110,0)">
-          <Figure shapes={back} fill={fill} view="back" />
+          <Figure shapes={backShapes} fill={fill} view="back" />
         </G>
       </Svg>
       {labels && (

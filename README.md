@@ -34,21 +34,13 @@ Pour repartir d'une nouvelle base : crée un projet Supabase, exécute [`supabas
 
 Le téléphone et l'ordinateur doivent être sur le même Wi-Fi. Sinon : `npx expo start --tunnel`.
 
-### Avoir l'app installée « pour de vrai » (sans ordinateur à la salle)
+### Sur iPhone sans ordinateur : la version web
 
-Expo Go a besoin que l'ordinateur tourne. Pour une vraie app installée :
-
-```bash
-npx eas-cli@latest login
-npx eas-cli@latest build:configure
-npx eas-cli@latest build --platform android --profile preview   # fichier .apk à installer directement
-```
-
-Sur iPhone, une installation hors Expo Go demande un compte Apple Developer (99 €/an) ; Expo Go reste gratuit.
+L'app est publiée automatiquement à chaque mise à jour sur **https://leobriandfiveo.github.io/Surcharge/**. Ouvre ce lien dans Safari, puis Partager → « Sur l'écran d'accueil » : elle s'ouvre en plein écran comme une vraie app.
 
 ## Inviter des amis
 
-Tes amis installent l'app (Expo Go + ton lien, ou l'APK), créent un compte, puis vous vous suivez depuis l'onglet **Profil** en cherchant vos pseudos. Tu vois dans ton fil les séances partagées des personnes que tu suis.
+Tes amis ouvrent le lien de la version web, créent un compte, puis vous vous suivez depuis l'onglet **Profil** en cherchant vos pseudos. Tu vois dans ton fil les séances partagées des personnes que tu suis.
 
 ## Développement
 
@@ -62,5 +54,4 @@ Code :
 - `src/lib/progression.ts` : calcul des charges et reps suggérées
 - `src/app/workout/[id].tsx` : écran de séance en cours
 - `src/app/(tabs)/` : onglets Séance, Fil, Progrès, Profil
-- `store/PUBLIER.md` : publier sur l'App Store et Google Play
 - `supabase/schema.sql` : tables et règles de visibilité (je vois mes données + les séances publiques des gens que je suis)

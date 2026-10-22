@@ -10,7 +10,8 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-import { MuscleMap } from '@/components/muscle-map';
+import { ExerciseFigure } from '@/components/exercise-figure';
+import { ExerciseSheet } from '@/components/exercise-sheet';
 import { Body, Button, Card, Input, Loading, Muted, Row, Screen } from '@/components/ui';
 import { Alert } from '@/lib/alert';
 import { useUserId } from '@/lib/auth';
@@ -323,13 +324,24 @@ export default function ActiveWorkout() {
 
 function BlockHeader({ exercise }: { exercise: Exercise }) {
   const c = findCatalog(exercise.catalog_id, exercise.name);
+  const [info, setInfo] = useState(false);
   return (
     <Row style={{ justifyContent: 'space-between' }}>
       <View style={{ flex: 1, gap: 2 }}>
         <Body style={{ fontSize: 18, fontWeight: '700' }}>{exercise.name}</Body>
         {c && <Muted style={{ fontSize: 12 }}>{c.primary.map((m) => muscleNames[m]).join(', ')}</Muted>}
+        {c && (
+          <Text onPress={() => setInfo(true)} style={{ color: colors.accent, fontSize: 12, fontWeight: '700' }}>
+            Voir le mouvement ›
+          </Text>
+        )}
       </View>
-      {c && <MuscleMap primary={c.primary} secondary={c.secondary} width={72} />}
+      {c && (
+        <Pressable onPress={() => setInfo(true)} style={{ backgroundColor: colors.bg, borderRadius: radius.md }}>
+          <ExerciseFigure motion={c.motion} primary={c.primary} secondary={c.secondary} equipment={c.equipment} size={78} animated />
+        </Pressable>
+      )}
+      {c && <ExerciseSheet exercise={info ? c : null} onClose={() => setInfo(false)} />}
     </Row>
   );
 }
