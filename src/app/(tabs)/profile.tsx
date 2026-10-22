@@ -1,10 +1,12 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, Linking, Text, View } from 'react-native';
 
 import { Avatar, Body, Button, Card, Input, Muted, Row, Screen, Stat, Subtitle, Title } from '@/components/ui';
 import { useAuth, useUserId } from '@/lib/auth';
+import { PRIVACY_URL } from '@/lib/config';
 import { supabase } from '@/lib/supabase';
+import { colors } from '@/lib/theme';
 import type { Profile } from '@/lib/types';
 
 export default function ProfileScreen() {
@@ -61,6 +63,28 @@ export default function ProfileScreen() {
     await supabase.from('profiles').update({ display_name: displayName.trim() || null }).eq('id', userId);
     setDisplayName(null);
     refreshProfile();
+  }
+
+  function deleteAccount() {
+    Alert.alert(
+      'Supprimer ton compte ?',
+      'Ton profil, tes programmes, tes séances, tes commentaires et tes abonnements seront définitivement effacés.',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer définitivement',
+          style: 'destructive',
+          onPress: async () => {
+            const { error } = await supabase.rpc('delete_my_account');
+            if (error) {
+              Alert.alert('Erreur', error.message);
+              return;
+            }
+            await supabase.auth.signOut();
+          },
+        },
+      ],
+    );
   }
 
   const name = profile?.display_name ?? profile?.username ?? '';
@@ -148,6 +172,12 @@ export default function ProfileScreen() {
       )}
 
       <Button variant="danger" title="Se déconnecter" onPress={() => supabase.auth.signOut()} />
+      <Button variant="danger" title="Supprimer mon compte" onPress={deleteAccount} />
+      <Muted style={{ textAlign: 'center', fontSize: 12 }}>
+        <Text style={{ color: colors.muted, textDecorationLine: 'underline' }} onPress={() => Linking.openURL(PRIVACY_URL)}>
+          Politique de confidentialité
+        </Text>
+      </Muted>
     </Screen>
   );
 }

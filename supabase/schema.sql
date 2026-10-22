@@ -223,3 +223,23 @@ create policy "commenter" on public.comments
   for insert to authenticated with check (user_id = auth.uid() and private.can_view_workout(workout_id));
 create policy "supprimer mon commentaire" on public.comments
   for delete to authenticated using (user_id = auth.uid());
+
+-- ---------------------------------------------------------------
+-- Suppression de compte depuis l'app (exigée par l'App Store et Google Play).
+-- La suppression de auth.users supprime le profil et toutes les données en cascade.
+-- ---------------------------------------------------------------
+
+create function public.delete_my_account()
+returns void
+language plpgsql
+security definer set search_path = ''
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+revoke execute on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;

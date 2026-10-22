@@ -62,4 +62,5 @@ Code :
 - `src/lib/progression.ts` : calcul des charges et reps suggérées
 - `src/app/workout/[id].tsx` : écran de séance en cours
 - `src/app/(tabs)/` : onglets Séance, Fil, Progrès, Profil
+- `store/PUBLIER.md` : publier sur l'App Store et Google Play
 - `supabase/schema.sql` : tables et règles de visibilité (je vois mes données + les séances publiques des gens que je suis)

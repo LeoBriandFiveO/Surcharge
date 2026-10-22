@@ -1,0 +1,85 @@
+<title>Confidentialité Surcharge</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* Mise en page : une colonne de lecture, un en-tête sobre aux couleurs de l'app. */
+:root {
+  --bg: #F7F6F4; --fg: #1B1C20; --muted: #5E626B; --line: #E2DFDA; --accent: #D9531B; --panel: #EFEDE9;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E0F12; --fg: #F1F2F4; --muted: #A2A7B0; --line: #2A2D34; --accent: #FF6B2C; --panel: #181A1F; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #0E0F12; --fg: #F1F2F4; --muted: #A2A7B0; --line: #2A2D34; --accent: #FF6B2C; --panel: #181A1F; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.6; }
+.wrap { max-width: 42rem; margin: 0 auto; padding-block: 48px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: grid; gap: 8px; padding-bottom: 24px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.app { font-family: var(--display); font-weight: 800; color: var(--accent); font-size: 15px; letter-spacing: .08em; text-transform: uppercase; }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 6vw, 42px); line-height: 1.1; margin: 0; text-wrap: balance; }
+.meta { color: var(--muted); font-size: 15px; margin: 0; }
+h2 { font-family: var(--display); font-weight: 500; font-size: 21px; margin: 36px 0 8px; text-wrap: balance; }
+p, li { max-width: 65ch; }
+ul { padding-left: 1.2em; display: grid; gap: 4px; }
+strong { font-weight: 600; }
+.summary { background: var(--panel); border-radius: 10px; padding: 16px 20px; margin-top: 24px; }
+.summary p { margin: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.scroll { overflow-x: auto; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--display); font-weight: 500; color: var(--muted); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="app">Surcharge</span>
+    <h1>Politique de confidentialité</h1>
+    <p class="meta">Dernière mise à jour : 22 octobre 2026</p>
+  </header>
+
+  <div class="summary">
+    <p><strong>En bref :</strong> Surcharge enregistre seulement ce qu'il faut pour suivre tes séances et les partager avec les personnes que tu choisis. Pas de publicité, pas de traceur, aucune revente de données. Tu peux supprimer ton compte et toutes tes données depuis l'app à tout moment.</p>
+  </div>
+
+  <h2>Qui est responsable</h2>
+  <p>Surcharge est une application indépendante de suivi de musculation éditée par Léo Briand, qui est responsable du traitement des données décrites ici.</p>
+
+  <h2>Données collectées</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Donnée</th><th>Pourquoi</th></tr></thead>
+      <tbody>
+        <tr><td>Adresse e-mail et mot de passe (chiffré)</td><td>Créer ton compte et te connecter</td></tr>
+        <tr><td>Pseudo et nom affiché</td><td>Permettre à tes amis de te trouver et de te reconnaître</td></tr>
+        <tr><td>Programmes, exercices, séances, charges et répétitions</td><td>Suivre ta progression et calculer les charges suggérées</td></tr>
+        <tr><td>Abonnements, « 💪 » et commentaires</td><td>Faire fonctionner le fil d'actualité entre amis</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>L'app ne collecte ni ta position, ni tes contacts, ni tes photos, ni de données de santé issues d'autres applications. Elle n'utilise aucun outil de mesure d'audience ni de publicité.</p>
+
+  <h2>Qui voit tes séances</h2>
+  <ul>
+    <li>Tes programmes ne sont visibles que par toi.</li>
+    <li>Une séance marquée « partagée » est visible par les personnes qui te suivent. Une séance privée reste visible par toi seul.</li>
+    <li>Ton pseudo et ton nom affiché sont visibles par les autres utilisateurs, pour qu'ils puissent te trouver.</li>
+  </ul>
+
+  <h2>Hébergement</h2>
+  <p>Les données sont hébergées par Supabase, sur des serveurs situés à Paris (Union européenne). Les échanges entre l'app et le serveur sont chiffrés (HTTPS). Supabase agit comme sous-traitant et n'utilise pas ces données pour son propre compte.</p>
+
+  <h2>Durée de conservation</h2>
+  <p>Tes données sont conservées tant que ton compte existe. Quand tu supprimes ton compte, ton profil, tes programmes, tes séances, tes commentaires et tes abonnements sont effacés immédiatement et définitivement.</p>
+
+  <h2>Tes droits</h2>
+  <p>Conformément au RGPD, tu peux accéder à tes données, les corriger, les supprimer ou t'opposer à leur traitement. Pour supprimer ton compte : <strong>Profil → Supprimer mon compte</strong> dans l'app. Pour toute autre demande, contacte l'éditeur à l'adresse indiquée sur la fiche de l'app dans l'App Store ou Google Play. Tu peux aussi saisir la CNIL (cnil.fr).</p>
+
+  <h2>Mineurs</h2>
+  <p>Surcharge s'adresse aux personnes de 16 ans et plus.</p>
+
+  <h2>Modifications</h2>
+  <p>Si cette politique change, la date en haut de la page est mise à jour et les changements importants sont signalés dans l'app.</p>
+</div>
